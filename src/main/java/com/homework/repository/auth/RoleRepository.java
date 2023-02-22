@@ -1,6 +1,6 @@
-package com.homework.repository;
+package com.homework.repository.auth;
 
-import com.homework.domain.Role;
+import com.homework.domain.auth.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,8 +1,8 @@
 package com.homework.controller;
 
-import com.homework.domain.Account;
-import com.homework.domain.dto.AccountRequestDto;
-import com.homework.service.AccountService;
+import com.homework.domain.auth.Account;
+import com.homework.domain.auth.dto.AccountRequestDto;
+import com.homework.service.auth.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

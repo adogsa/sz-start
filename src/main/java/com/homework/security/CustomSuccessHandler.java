@@ -3,7 +3,7 @@ package com.homework.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.homework.service.AccountService;
+import com.homework.service.auth.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.homework.security.JwtConstants.*;
-import static com.homework.security.JwtConstants.RT_HEADER;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RequiredArgsConstructor

@@ -1,7 +1,7 @@
-package com.homework.service;
+package com.homework.service.auth;
 
-import com.homework.domain.Account;
-import com.homework.domain.dto.AccountRequestDto;
+import com.homework.domain.auth.Account;
+import com.homework.domain.auth.dto.AccountRequestDto;
 
 import java.util.Map;
 

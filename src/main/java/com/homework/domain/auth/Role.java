@@ -1,4 +1,4 @@
-package com.homework.domain;
+package com.homework.domain.auth;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

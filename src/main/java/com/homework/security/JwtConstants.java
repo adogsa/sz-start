@@ -8,8 +8,8 @@ public class JwtConstants {
     public static final long DAY = 24 * HOUR;
     public static final long MONTH = 30 * DAY;
 
-    public static final long AT_EXP_TIME =  10 * MINUTE;
-    public static final long RT_EXP_TIME =  100 * MINUTE;
+    public static final long AT_EXP_TIME = DAY;
+    public static final long RT_EXP_TIME = 7 * DAY;
 
     // Secret
     public static final String JWT_SECRET = "jwt_secret_key_homework_secret_key_jwt";

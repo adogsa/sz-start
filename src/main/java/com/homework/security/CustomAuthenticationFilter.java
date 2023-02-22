@@ -1,7 +1,7 @@
 package com.homework.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.homework.domain.dto.AccountRequestDto;
+import com.homework.domain.auth.dto.AccountRequestDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

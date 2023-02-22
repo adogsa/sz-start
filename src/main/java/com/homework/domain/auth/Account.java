@@ -1,6 +1,7 @@
-package com.homework.domain;
+package com.homework.domain.auth;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.homework.converter.CryptoStringConverter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,15 +20,19 @@ public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
     private Long id;
 
     private String name;
     private String userId;
     @JsonIgnore
     private String password;
+
+    @Convert(converter = CryptoStringConverter.class)
     @JsonIgnore
     private String regNo;
 
+    @JsonIgnore
     @ManyToMany
     private List<Role> roles = new ArrayList<>();
 
@@ -35,12 +40,5 @@ public class Account {
 
     public void updateRefreshToken(String newToken) {
         this.refreshToken = newToken;
-    }
-
-    public void setPassword(String encPassword) {
-        this.password = encPassword;
-    }
-    public void setUserId(String userId) {
-        this.userId = userId;
     }
 }

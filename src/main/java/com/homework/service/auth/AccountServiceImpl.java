@@ -1,14 +1,15 @@
-package com.homework.service;
+package com.homework.service.auth;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.homework.domain.Account;
-import com.homework.domain.Role;
-import com.homework.domain.dto.AccountRequestDto;
-import com.homework.repository.AccountRepository;
+import com.homework.domain.auth.Account;
+import com.homework.domain.auth.Role;
+import com.homework.domain.auth.dto.AccountRequestDto;
+import com.homework.encrypt.Seed;
+import com.homework.repository.auth.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,10 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.homework.security.JwtConstants.*;
@@ -39,6 +37,7 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+        log.info(Seed.encrypt("921108-1582816"));
         Account account = accountRepository.findByUserId(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("UserDetailsService - loadUserByUsername : 사용자를 찾을 수 없습니다."));
 
@@ -50,14 +49,21 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
 
     @Override
     public Account findByUserId(String userId) {
+        log.info(Seed.encrypt("921108-1582816"));
         return accountRepository.findByUserId(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("UserDetailsService - loadUserByUsername : 사용자를 찾을 수 없습니다."));
     }
     @Override
     public Long saveAccount(AccountRequestDto dto) {
+        log.info(passwordRegNoEncoder.encode("921108-1582816"));
+
         Account curAccount = validateUser(dto);
-        curAccount.setPassword(passwordRegNoEncoder.encode(dto.getPassword()));
-        curAccount.setUserId(dto.getUserId());
+        curAccount = Account.builder()
+                .id(curAccount.getId())
+                .name(curAccount.getName())
+                .regNo(curAccount.getRegNo())
+                .password(passwordRegNoEncoder.encode(dto.getPassword()))
+                .userId(dto.getUserId()).build();
         return accountRepository.save(curAccount).getId();
     }
 
@@ -69,11 +75,11 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
 
         Account account = accountRepository.findByName(dto.getName()).orElseThrow(() -> new RuntimeException("사전 등록되어 있지 않은 사용자입니다. 관리자에게 문의해주세요."));
 
-        if (!passwordRegNoEncoder.matches(dto.getRegNo(), account.getRegNo())) {
+        if (!Objects.equals(dto.getRegNo(), account.getRegNo())) {
             throw new RuntimeException("사전 등록되어 있지 않은 사용자입니다. 관리자에게 문의해주세요.");
         }
 
-        if (account.getUserId() != null) {
+        if (!account.getUserId().isBlank()) {
             throw new RuntimeException("이미 가입한 사용자입니다.");
         }
 
