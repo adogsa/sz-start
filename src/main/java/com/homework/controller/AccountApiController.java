@@ -3,6 +3,8 @@ package com.homework.controller;
 import com.homework.domain.auth.Account;
 import com.homework.domain.auth.dto.AccountRequestDto;
 import com.homework.service.auth.AccountService;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,16 +24,20 @@ public class AccountApiController {
 
     private final AccountService accountService;
 
+    @ApiOperation(value = "회원가입")
+    @ApiImplicitParam(name = "dto", value = "회원가입 필요사항")
     @PostMapping("/signup")
     public ResponseEntity<Long> signup(@RequestBody AccountRequestDto dto) {
         return ResponseEntity.ok(accountService.saveAccount(dto));
     }
 
+    @ApiOperation(value = "내정보 가져오기")
     @GetMapping("/me")
     public ResponseEntity<Account> me(Principal principal) {
         return ResponseEntity.ok(accountService.findByUserId(principal.getName()));
     }
 
+    @ApiOperation(value = "jwt 토큰 다시 가져오기")
     @GetMapping("/refresh")
     public ResponseEntity<Map<String, String>> refresh(HttpServletRequest request, HttpServletResponse response) {
         String authorizationHeader = request.getHeader(AUTHORIZATION);

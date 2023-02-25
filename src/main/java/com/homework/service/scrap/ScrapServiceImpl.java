@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.DecimalFormat;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 
 @Slf4j
@@ -28,82 +29,69 @@ public class ScrapServiceImpl implements ScrapService {
     private final AccountService accountService;
 
     public String requestScrapMyTax(String userId) {
-        CompletableFuture<String> requestResult = this.asyncScrapService.scrapMyTax(userId);
+        Account curAccount = this.accountService.findByUserId(userId);
+        CompletableFuture<String> requestResult = this.asyncScrapService.scrapMyTax(curAccount.getName(), curAccount.getRegNo());
 
         requestResult.thenAccept(
                 result -> {
-                    System.out.println("accept");
+                    JSONObject jObject = new JSONObject(result);
+                    JSONObject data = jObject.getJSONObject("data");
+                    JSONObject jsonList = data.getJSONObject("jsonList");
 
-                    try {
-                        JSONObject jObject = new JSONObject(result);
-                        JSONObject data = jObject.getJSONObject("data");
-                        JSONObject jsonList = data.getJSONObject("jsonList");
+                    JSONArray salaryArr = jsonList.getJSONArray("급여");
+                    long totalSalary = 0;
+                    for (int i = 0; i < salaryArr.length(); i++) {
+                        JSONObject one = salaryArr.getJSONObject(i);
+                        String oneSalary = one.getString("총지급액").replaceAll(",", "");
 
-                        JSONArray salaryArr = jsonList.getJSONArray("급여");
-                        long totalSalary = 0;
-                        for (int i = 0; i < salaryArr.length(); i++) {
-                            JSONObject one = salaryArr.getJSONObject(i);
-                            String oneSalary = one.getString("총지급액").replaceAll(",", "");
-
-                            totalSalary += Long.parseLong(oneSalary);
-                        }
-
-                        long calculatedTax = Long.parseLong(jsonList.getString("산출세액").replaceAll(",", ""));
-
-                        long insuranceAmount = 0;
-                        long educationAmount = 0;
-                        long donationAmount = 0;
-                        long medicalAmount = 0;
-                        double retirementAmount = 0;
-                        JSONArray jArray = jsonList.getJSONArray("소득공제");
-                        log.info(String.valueOf(jArray));
-                        for (int i = 0; i < jArray.length(); i++) {
-                            JSONObject one = jArray.getJSONObject(i);
-                            log.info(String.valueOf(one));
-                            String type = one.getString("소득구분");
-                            if (Objects.equals(type, "보험료")) {
-                                insuranceAmount = Long.parseLong(one.getString("금액").replaceAll(",", ""));
-                            } else if (Objects.equals(type, "교육비")) {
-                                educationAmount = Long.parseLong(one.getString("금액").replaceAll(",", ""));
-                            } else if (Objects.equals(type, "기부금")) {
-                                donationAmount = Long.parseLong(one.getString("금액").replaceAll(",", ""));
-                            } else if (Objects.equals(type, "의료비")) {
-                                medicalAmount = Long.parseLong(one.getString("금액").replaceAll(",", ""));
-                            } else if (Objects.equals(type, "퇴직연금")) {
-                                retirementAmount = Double.parseDouble(one.getString("총납임금액").replaceAll(",", ""));
-                            }
-
-                        }
-
-                        Tax entityData = Tax.builder()
-                                .userId(userId)
-                                .totalSalary(totalSalary)
-                                .calculatedTax(calculatedTax)
-                                .insuranceAmount(insuranceAmount)
-                                .educationAmount(educationAmount)
-                                .donationAmount(donationAmount)
-                                .medicalAmount(medicalAmount)
-                                .retirementAmount(retirementAmount).build();
-
-                        System.out.println(entityData.toString());
-                        System.out.println(entityData.getEarnedIncomeDeduction());
-
-                        this.scrapRepository.save(entityData);
-
-                        log.info("대기응답이 긴 Thread 응답 결과 {}", result);
-                        if ("false".equals(result)) {
-                            log.warn("Cert 인증 실패");
-                            return;
-                        }
-                        log.info("사용자 최종 상태 변경 호출전 - 4");
-                        log.info("대기응답이 긴 Thread 호출 후 - 1");
-                    } catch (Exception e) {
-                        log.error(e.getMessage());
+                        totalSalary += Long.parseLong(oneSalary);
                     }
 
+                    long calculatedTax = Long.parseLong(jsonList.getString("산출세액").replaceAll(",", ""));
+
+                    long insuranceAmount = 0;
+                    long educationAmount = 0;
+                    long donationAmount = 0;
+                    long medicalAmount = 0;
+                    double retirementAmount = 0;
+                    JSONArray jArray = jsonList.getJSONArray("소득공제");
+                    log.info(String.valueOf(jArray));
+                    for (int i = 0; i < jArray.length(); i++) {
+                        JSONObject one = jArray.getJSONObject(i);
+                        log.info(String.valueOf(one));
+                        String type = one.getString("소득구분");
+                        if (Objects.equals(type, "보험료")) {
+                            insuranceAmount = Long.parseLong(one.getString("금액").replaceAll(",", ""));
+                        } else if (Objects.equals(type, "교육비")) {
+                            educationAmount = Long.parseLong(one.getString("금액").replaceAll(",", ""));
+                        } else if (Objects.equals(type, "기부금")) {
+                            donationAmount = Long.parseLong(one.getString("금액").replaceAll(",", ""));
+                        } else if (Objects.equals(type, "의료비")) {
+                            medicalAmount = Long.parseLong(one.getString("금액").replaceAll(",", ""));
+                        } else if (Objects.equals(type, "퇴직연금")) {
+                            retirementAmount = Double.parseDouble(one.getString("총납임금액").replaceAll(",", ""));
+                        }
+
+                    }
+
+                    Tax entityData = Tax.builder()
+                            .userId(userId)
+                            .totalSalary(totalSalary)
+                            .calculatedTax(calculatedTax)
+                            .insuranceAmount(insuranceAmount)
+                            .educationAmount(educationAmount)
+                            .donationAmount(donationAmount)
+                            .medicalAmount(medicalAmount)
+                            .retirementAmount(retirementAmount).build();
+
+                    this.scrapRepository.save(entityData);
                 }
-        );
-        return "true";
+        ).exceptionally(t -> {
+            log.error(t.getMessage());
+            t.printStackTrace();
+            throw new CompletionException(t);
+        });
+        return "스크랩 요청이 완료되었습니다.";
     }
 
     public ScrapResDto refund(String userId) {

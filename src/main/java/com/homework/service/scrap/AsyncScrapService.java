@@ -1,9 +1,9 @@
 package com.homework.service.scrap;
 
-import com.homework.domain.auth.Account;
 import com.homework.service.auth.AccountService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -24,23 +24,23 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 @Service
 public class AsyncScrapService {
-
+    @Autowired
     private AccountService accountService;
+    @Autowired
     private RestTemplate restTemplate;
     @Value("${external.my.tax.url}")
     private String externalMyTaxUrl;
 
     @Async
-    public CompletableFuture<String> scrapMyTax(String userId) {
+    public CompletableFuture<String> scrapMyTax(String name, String regNo) {
         // Header set
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 
         // Body set
-        Account curAccount = this.accountService.findByUserId(userId);
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("name", curAccount.getName());
-        body.add("regNo", curAccount.getRegNo());
+        body.add("name", name);
+        body.add("regNo", regNo);
 
         // Message
         HttpEntity<?> requestMessage = new HttpEntity<>(body, httpHeaders);

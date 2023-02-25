@@ -8,7 +8,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.homework.domain.auth.Account;
 import com.homework.domain.auth.Role;
 import com.homework.domain.auth.dto.AccountRequestDto;
-import com.homework.encrypt.Seed;
 import com.homework.repository.auth.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +36,6 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-        log.info(Seed.encrypt("921108-1582816"));
         Account account = accountRepository.findByUserId(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("UserDetailsService - loadUserByUsername : 사용자를 찾을 수 없습니다."));
 
@@ -49,7 +47,6 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
 
     @Override
     public Account findByUserId(String userId) {
-        log.info(Seed.encrypt("921108-1582816"));
         return accountRepository.findByUserId(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("UserDetailsService - loadUserByUsername : 사용자를 찾을 수 없습니다."));
     }
@@ -79,7 +76,7 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
             throw new RuntimeException("사전 등록되어 있지 않은 사용자입니다. 관리자에게 문의해주세요.");
         }
 
-        if (!account.getUserId().isBlank()) {
+        if (account.getUserId() != null && !account.getUserId().isBlank()) {
             throw new RuntimeException("이미 가입한 사용자입니다.");
         }
 

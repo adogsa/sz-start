@@ -31,7 +31,7 @@ public class Tax {
     private String userId;
 
     public Double getEarnedIncomeDeduction() {
-        double EarnedIncome = this.calculatedTax * 0.55; // 근로 소득 세액 공제 금액
+        double earnedIncome = this.calculatedTax * 0.55; // 근로 소득 세액 공제 금액
 
         // 의료비 공제 금액
         double medicalTax = (this.medicalAmount - this.totalSalary * 0.03) * 0.15; // 의료비 공제 금액
@@ -52,7 +52,7 @@ public class Tax {
         double retirementTax = this.retirementAmount * 0.15;
 
         //결정 세액
-        double result = this.calculatedTax - EarnedIncome - specialTax - standardTax - retirementTax;
+        double result = this.calculatedTax - earnedIncome - specialTax - standardTax - retirementTax;
 
         return result < 0 ? 0 : result;
     }
