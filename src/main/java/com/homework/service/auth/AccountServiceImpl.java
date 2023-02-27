@@ -36,7 +36,6 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-        log.info("userId: " + userId);
         Account account = accountRepository.findByUserId(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("UserDetailsService - loadUserByUsername : 사용자를 찾을 수 없습니다."));
 
