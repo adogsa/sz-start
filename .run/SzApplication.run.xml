@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+    <configuration default="false" name="SzApplication" type="SpringBootApplicationConfigurationType"
+                   factoryName="Spring Boot">
+        <option name="ACTIVE_PROFILES"/>
+        <envs>
+            <env name="jasypt.encryptor.password" value="mypass"/>
+        </envs>
+        <module name="sz-start.main"/>
+        <option name="SPRING_BOOT_MAIN_CLASS" value="com.homework.SzApplication"/>
+        <method v="2">
+            <option name="Make" enabled="true"/>
+        </method>
+    </configuration>
+</component>

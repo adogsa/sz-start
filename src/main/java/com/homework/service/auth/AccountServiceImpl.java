@@ -36,6 +36,7 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+        log.info("userId: " + userId);
         Account account = accountRepository.findByUserId(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("UserDetailsService - loadUserByUsername : 사용자를 찾을 수 없습니다."));
 
@@ -50,10 +51,9 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
         return accountRepository.findByUserId(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("UserDetailsService - loadUserByUsername : 사용자를 찾을 수 없습니다."));
     }
-    @Override
-    public Long saveAccount(AccountRequestDto dto) {
-        log.info(passwordRegNoEncoder.encode("921108-1582816"));
 
+    @Override
+    public Account saveAccount(AccountRequestDto dto) {
         Account curAccount = validateUser(dto);
         curAccount = Account.builder()
                 .id(curAccount.getId())
@@ -61,7 +61,7 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
                 .regNo(curAccount.getRegNo())
                 .password(passwordRegNoEncoder.encode(dto.getPassword()))
                 .userId(dto.getUserId()).build();
-        return accountRepository.save(curAccount).getId();
+        return accountRepository.save(curAccount);
     }
 
     private Account validateUser(AccountRequestDto dto) {
@@ -89,6 +89,7 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
     public void updateRefreshToken(String userId, String refreshToken) {
         Account account = accountRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
         account.updateRefreshToken(refreshToken);
+        accountRepository.save(account);
     }
 
     @Override
@@ -103,11 +104,11 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
         String username = decodedJWT.getSubject();
         Account account = accountRepository.findByUserId(username)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
-        if (!account.getRefreshToken().equals(refreshToken)) {
+        if (account.getRefreshToken() == null || !account.getRefreshToken().equals(refreshToken)) {
             throw new JWTVerificationException("유효하지 않은 Refresh Token 입니다.");
         }
         String accessToken = JWT.create()
-                .withSubject(account.getName())
+                .withSubject(account.getUserId())
                 .withExpiresAt(new Date(now + AT_EXP_TIME))
                 .withClaim("roles", account.getRoles().stream().map(Role::getName)
                         .collect(Collectors.toList()))
@@ -121,11 +122,12 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
         long diffMin = (refreshExpireTime - now) / 1000 / 60;
         if (diffMin < 5) {
             String newRefreshToken = JWT.create()
-                    .withSubject(account.getName())
+                    .withSubject(account.getUserId())
                     .withExpiresAt(new Date(now + RT_EXP_TIME))
                     .sign(Algorithm.HMAC256(JWT_SECRET));
             accessTokenResponseMap.put(RT_HEADER, newRefreshToken);
             account.updateRefreshToken(newRefreshToken);
+            accountRepository.save(account);
         }
 
         accessTokenResponseMap.put(AT_HEADER, accessToken);

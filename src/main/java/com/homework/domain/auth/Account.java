@@ -36,6 +36,7 @@ public class Account {
     @ManyToMany
     private List<Role> roles = new ArrayList<>();
 
+    @JsonIgnore
     private String refreshToken;
 
     public void updateRefreshToken(String newToken) {

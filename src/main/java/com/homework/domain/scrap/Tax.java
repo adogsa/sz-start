@@ -21,7 +21,7 @@ public class Tax {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long totalSalary; // 총급여
-    private Long calculatedTax; // 산출세액
+    private Double calculatedTax; // 산출세액
     private Long insuranceAmount; // 보험료
     private Long medicalAmount; // 의료비
     private Long educationAmount; // 교육비

@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface ScrapRepository extends JpaRepository<Tax, Long> {
-    Optional<Tax> findTaxByUserId(String userId);
+    Optional<Tax> findTopByUserId(String userId);
 }

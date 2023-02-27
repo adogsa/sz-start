@@ -45,7 +45,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers("/v3/api-docs/**").permitAll()   // OAS_30
                 .antMatchers("/swagger-resources/**").permitAll()
-//                .antMatchers("/v2/api-docs/**").permitAll()   // swagger 2
+                .antMatchers("/v2/api-docs/**").permitAll()   // swagger 2
                 .antMatchers("/swagger-ui/**").permitAll();
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(customAuthenticationFilter);

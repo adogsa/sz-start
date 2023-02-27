@@ -38,13 +38,13 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
         String servletPath = request.getServletPath();
         String authrizationHeader = request.getHeader(AUTHORIZATION);
 
-        // 로그인, 리프레시 요청이라면 토큰 검사하지 않음
-        log.info(servletPath);
-        if (servletPath.equals("/szs/login") || servletPath.equals("/szs/refresh") || servletPath.equals("/szs/signup") || servletPath.startsWith("/swagger")) {
+        // 로그인, 리프레시, swagger 요청이라면 토큰 검사하지 않음
+        if (servletPath.equals("/szs/login") || servletPath.equals("/szs/refresh") || servletPath.equals("/szs/signup") || servletPath.startsWith("/swagger")
+                || servletPath.startsWith("/v3/api-docs") || servletPath.startsWith("/v2/api-docs") || servletPath.startsWith("/favicon.ico")) {
             filterChain.doFilter(request, response);
         } else if (authrizationHeader == null || !authrizationHeader.startsWith(TOKEN_HEADER_PREFIX)) {
             // 토큰값이 없거나 정상적이지 않다면 400 오류
-            log.info("CustomAuthorizationFilter : JWT Token이 존재하지 않습니다.");
+            log.error("CustomAuthorizationFilter : JWT Token이 존재하지 않습니다.");
             response.setStatus(SC_BAD_REQUEST);
             response.setContentType(APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("utf-8");

@@ -2,12 +2,13 @@ package com.homework.controller;
 
 import com.homework.domain.auth.Account;
 import com.homework.domain.auth.dto.AccountRequestDto;
+import com.homework.domain.auth.dto.AccountResponseDto;
 import com.homework.service.auth.AccountService;
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,21 +26,20 @@ public class AccountApiController {
     private final AccountService accountService;
 
     @ApiOperation(value = "회원가입")
-    @ApiImplicitParam(name = "dto", value = "회원가입 필요사항")
     @PostMapping("/signup")
-    public ResponseEntity<Long> signup(@RequestBody AccountRequestDto dto) {
-        return ResponseEntity.ok(accountService.saveAccount(dto));
+    public ResponseEntity<Account> signup(@RequestBody AccountRequestDto requestDto) {
+        return ResponseEntity.ok(accountService.saveAccount(requestDto));
     }
 
     @ApiOperation(value = "내정보 가져오기")
     @GetMapping("/me")
-    public ResponseEntity<Account> me(Principal principal) {
+    public ResponseEntity<Account> me(@ApiIgnore Principal principal) {
         return ResponseEntity.ok(accountService.findByUserId(principal.getName()));
     }
 
     @ApiOperation(value = "jwt 토큰 다시 가져오기")
     @GetMapping("/refresh")
-    public ResponseEntity<Map<String, String>> refresh(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<AccountResponseDto> refresh(HttpServletRequest request, HttpServletResponse response) {
         String authorizationHeader = request.getHeader(AUTHORIZATION);
 
         if (authorizationHeader == null || !authorizationHeader.startsWith(TOKEN_HEADER_PREFIX)) {
@@ -51,6 +51,6 @@ public class AccountApiController {
         if (tokens.get(RT_HEADER) != null) {
             response.setHeader(RT_HEADER, tokens.get(RT_HEADER));
         }
-        return ResponseEntity.ok(tokens);
+        return ResponseEntity.ok(new AccountResponseDto(tokens.get(AT_HEADER), tokens.get(RT_HEADER)));
     }
 }

@@ -34,7 +34,6 @@ class AccountServiceImplTest {
     String testUserId = "duly2";
     String testUserName = "둘리2";
     String testUserReg = "111111-1111111";
-    String testPassword = "password";
     MockMvc mvc;
 
     @BeforeEach
@@ -55,10 +54,10 @@ class AccountServiceImplTest {
         AccountRequestDto accountDto = new AccountRequestDto(testUserId, "password", testUserName, testUserReg, 200L);
 
         // when
-        long id = accountService.saveAccount(accountDto);
+        Account result = accountService.saveAccount(accountDto);
 
         // then
-        assertThat(id).isEqualTo(testAccount.getId());
+        assertThat(result.getId()).isEqualTo(testAccount.getId());
     }
 
     @DisplayName("사용자 정보 조회 테스트")

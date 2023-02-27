@@ -7,7 +7,9 @@ import java.util.Map;
 
 public interface AccountService {
     Account findByUserId(String userId);
-    Long saveAccount(AccountRequestDto dto);
+
+    Account saveAccount(AccountRequestDto dto);
+
     void updateRefreshToken(String userId, String refreshToken);
 
     Map<String, String> refresh(String refreshToken);
